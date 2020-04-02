@@ -1,4 +1,4 @@
-# TAMAGO-03 Recoarder With ALSA
+# TAMAGO-03 Recorder With ALSA
 
 
 ## Files
@@ -21,5 +21,5 @@ apt install alsa arecord libasound2-dev
 arecord -l 
 
 # hw:2 のTAMAGOをoutput.wav に録音
-./rec hw:2 output.wav
+./rec -d hw:2 -o output.wav
 ```

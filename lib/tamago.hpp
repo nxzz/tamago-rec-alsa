@@ -25,7 +25,7 @@ class Tamago
 
   public:
     // デバイス名, バッファミリ秒
-    Tamago(char *deviceName, unsigned int bufferT)
+    Tamago(const char *deviceName, unsigned int bufferT)
         : bufferTime(bufferT)
     {
         hwInit(deviceName);
@@ -34,7 +34,7 @@ class Tamago
     }
 
     // pcm デバイスの初期化
-    void hwInit(char *dev)
+    void hwInit(const char *dev)
     {
         if (snd_pcm_open(&capture_handle, dev, SND_PCM_STREAM_CAPTURE, 0) < 0)
             throw std::runtime_error("cannot open audio device");
@@ -78,12 +78,9 @@ class Tamago
     {
         for (;;) {
             int readBuffFrames = snd_pcm_readi(capture_handle, buffer, bufferTime * (samplingRate / 1000));
-            if (readBuffFrames != bufferTime * (samplingRate / 1000)) {
-                throw std::runtime_error("read from audio interface failed");
-            }
             unsigned int timeStart = bufferTime * bufferReadCount;
             unsigned int timeEnd = bufferTime * (bufferReadCount + 1);
-            if (!callback(timeStart, timeEnd, buffer, bufferSize))
+            if (!callback(timeStart, timeEnd, buffer, readBuffFrames * snd_pcm_format_width(format) / 8 * channelCount))
                 break;
             bufferReadCount++;
         }
