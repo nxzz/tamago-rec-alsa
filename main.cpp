@@ -48,14 +48,18 @@ int main(int argc, char *argv[])
     // ./rec.wav に 8ch 16khz/24bit で書き込む
     RIFF wav(outputFileName, 8, 24, 16000);
 
-    egg.getBuffer([&](unsigned int readCount, unsigned long long int readLength, char *buffer, unsigned int bufferSize) {
-        wav.write(buffer, bufferSize);
+    egg.getBuffer([&](unsigned int readCount, unsigned long long int readLength, char *buffer, int readBuffFrames) {
+        time_t t = time(0);
+        if (readBuffFrames < 0) {
+            // error 出たら中止
+            cout << t << ",error," << snd_strerror(readBuffFrames / 24) << endl;
+            return false;
+        }
+        wav.write(buffer, readBuffFrames);
         if ((recordTime != 0 && readCount * recBufSize > recordTime) || stopFlag != 0) {
             return false;
         } else {
-            time_t t = time(0);
-
-            cout << t << "," << readCount * recBufSize << "," << readLength << endl;
+            cout << t << "," << readCount * recBufSize << "," << readLength << "," << readBuffFrames << endl;
             return true;
         }
     });

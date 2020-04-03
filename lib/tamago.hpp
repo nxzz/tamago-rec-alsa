@@ -73,7 +73,7 @@ class Tamago
 
     // バッファがたまるたびにコールバックが呼ばれる
     // コールバック関数がfalseを返すと終了
-    void getBuffer(const std::function<bool(unsigned int, unsigned long long int, char *, unsigned int)> &callback)
+    void getBuffer(const std::function<bool(unsigned int, unsigned long long int, char *, int)> &callback)
     {
         unsigned int bufferReadCount = 0;    // 今までにバッファを読んだ回数
         unsigned long long int readByte = 0; // 今までバッファから読み込んだバイト数
