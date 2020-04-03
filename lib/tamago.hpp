@@ -20,7 +20,6 @@ class Tamago
     char *buffer = nullptr;         // バッファ
 
     // misc
-    unsigned int bufferReadCount = 0; // 今までにバッファを読んだ数
     unsigned int bufferSize = 0;
 
   public:
@@ -74,15 +73,19 @@ class Tamago
 
     // バッファがたまるたびにコールバックが呼ばれる
     // コールバック関数がfalseを返すと終了
-    void getBuffer(const std::function<bool(unsigned int, unsigned int, char *, unsigned int)> &callback)
+    void getBuffer(const std::function<bool(unsigned int, unsigned long long int, char *, unsigned int)> &callback)
     {
+        unsigned int bufferReadCount = 0;    // 今までにバッファを読んだ回数
+        unsigned long long int readByte = 0; // 今までバッファから読み込んだバイト数
+
         for (;;) {
             int readBuffFrames = snd_pcm_readi(capture_handle, buffer, bufferTime * (samplingRate / 1000));
-            unsigned int timeStart = bufferTime * bufferReadCount;
-            unsigned int timeEnd = bufferTime * (bufferReadCount + 1);
-            if (!callback(timeStart, timeEnd, buffer, readBuffFrames * snd_pcm_format_width(format) / 8 * channelCount))
-                break;
+
+            bufferReadCount += readBuffFrames * snd_pcm_format_width(format) / 8 * channelCount;
             bufferReadCount++;
+
+            if (!callback(bufferReadCount, bufferReadCount, buffer, readBuffFrames * snd_pcm_format_width(format) / 8 * channelCount))
+                break;
         }
     }
 };

@@ -2,6 +2,7 @@
 #include "./lib/riff.hpp"
 #include "./lib/tamago.hpp"
 #include <csignal>
+#include <ctime>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -12,6 +13,12 @@ sig_atomic_t stopFlag = 0;
 void signal_handler(int signal)
 {
     stopFlag = 1;
+}
+
+bool checkFileExistence(const std::string &str)
+{
+    std::ifstream ifs(str);
+    return ifs.is_open();
 }
 
 int main(int argc, char *argv[])
@@ -30,18 +37,25 @@ int main(int argc, char *argv[])
     unsigned int recBufSize = p.get<unsigned int>("bufsize");
     unsigned int recordTime = p.get<unsigned int>("recordTime");
 
+    // ファイルがないか確認
+    if (checkFileExistence(outputFileName)) {
+        throw std::runtime_error("file exist");
+    };
+
     // 1秒ごとに取り込む
     Tamago egg(recDeviceName, recBufSize);
 
     // ./rec.wav に 8ch 16khz/24bit で書き込む
     RIFF wav(outputFileName, 8, 24, 16000);
 
-    egg.getBuffer([&](unsigned int timeStart, unsigned int timeEnd, char *buffer, unsigned int bufferSize) {
+    egg.getBuffer([&](unsigned int readCount, unsigned long long int readLength, char *buffer, unsigned int bufferSize) {
         wav.write(buffer, bufferSize);
-        if ((recordTime != 0 && timeEnd > recordTime) || stopFlag != 0) {
+        if ((recordTime != 0 && readCount * recBufSize > recordTime) || stopFlag != 0) {
             return false;
         } else {
-            cout << timeEnd << endl;
+            time_t t = time(0);
+
+            cout << t << "," << readCount * recBufSize << "," << readLength << endl;
             return true;
         }
     });
