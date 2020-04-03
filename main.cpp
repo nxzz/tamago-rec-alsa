@@ -23,46 +23,65 @@ bool checkFileExistence(const std::string &str)
 
 int main(int argc, char *argv[])
 {
+    // シグナルハンドラ
     signal(SIGINT, signal_handler);
 
+    // コマンドパーサ
     cmdline::parser p;
     p.add<string>("device", 'd', "PCM Device", true);
     p.add<string>("output", 'o', "Output File Name", true);
+    p.add<string>("logOut", 'l', "Log File Name (if this option is not present, log output to strout)", false, "");
     p.add<unsigned int>("bufsize", 'b', "Record Buffer Size (milsec)", false, 1000);
     p.add<unsigned int>("recordTime", 't', "Record Time (milsec)", false, 0);
     p.parse_check(argc, argv);
 
     const char *recDeviceName = p.get<string>("device").c_str();
     const char *outputFileName = p.get<string>("output").c_str();
+    string logFileName = p.get<string>("logOut");
     unsigned int recBufSize = p.get<unsigned int>("bufsize");
     unsigned int recordTime = p.get<unsigned int>("recordTime");
 
     // ファイルがないか確認
-    if (checkFileExistence(outputFileName)) {
+    if (checkFileExistence(outputFileName) || (logFileName != "" && checkFileExistence(logFileName))) {
         throw std::runtime_error("file exist");
     };
 
-    // 1秒ごとに取り込む
+    // ログファイル名が指定されている場合、coutをログファイルにリダイレクトする
+    ofstream ofs;
+    if (logFileName != "") {
+        ofs.open(logFileName);
+        cout.rdbuf(ofs.rdbuf());
+    }
+
+    // 1秒ごとにタマゴから取り込む
     Tamago egg(recDeviceName, recBufSize);
 
     // ./rec.wav に 8ch 16khz/24bit で書き込む
     RIFF wav(outputFileName, 8, 24, 16000);
 
+    // バッファにたまるたびに呼ばれるコールバック関数
     egg.getBuffer([&](unsigned int readCount, unsigned long long int readLength, char *buffer, int readBuffFrames) {
         time_t t = time(0);
-        if (readBuffFrames < 0) {
-            // error 出たら中止
-            cout << t << ",error," << snd_strerror(readBuffFrames / 24) << endl;
-            return false;
-        }
-        wav.write(buffer, readBuffFrames);
+
+        // Ctrl + C で止められるか、指定時間分のデータを読んだら停止
         if ((recordTime != 0 && readCount * recBufSize > recordTime) || stopFlag != 0) {
             return false;
         } else {
+            // error 出たら記録してリトライ
+            if (readBuffFrames < 0) {
+                cout << t << ",error," << snd_strerror(readBuffFrames) << endl;
+                return true;
+            }
+            // 問題なければ書きこむ
+            wav.write(buffer, readBuffFrames);
             cout << t << "," << readCount * recBufSize << "," << readLength << "," << readBuffFrames << endl;
             return true;
         }
     });
+
+    if (logFileName != "") {
+        ofs.close();
+    }
 
     return 0;
 }

@@ -20,6 +20,8 @@ apt install alsa arecord libasound2-dev
 # TAMAGOのデバイス名を調べる card2 なら hw:2
 arecord -l 
 
+
+## 録音関連オプション
 # hw:2 のTAMAGOをoutput.wav に Ctrl+C で止めるまで録音
 ./rec -d hw:2 -o output.wav
 
@@ -30,5 +32,9 @@ arecord -l
 # バッファサイズの整数倍しか録音できないので注意
 ./rec -d hw:2 -o output.wav -t 500 -b 100
 
+## ログ関連オプション
+# ログを output.log に保存する
+# -l 無しだと stdoutに吐く
+./rec -d hw:2 -o output.wav -t 10000 -l output.log
 
 ```

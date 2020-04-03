@@ -84,7 +84,8 @@ class Tamago
 
             // 読み出しがこけたら、リカバリを試す
             if (readBuffFrames < 0) {
-                snd_pcm_recover(capture_handle, readBuffFrames, 0);
+                snd_pcm_recover(capture_handle, readBuffFrames, 1);          //サイレント修正
+                callback(bufferReadCount, readByte, buffer, readBuffFrames); // エラーの存在を通知するために、コールバックは呼ぶ
                 continue;
             }
             readByte += readBuffFrames * snd_pcm_format_width(format) / 8 * channelCount;
