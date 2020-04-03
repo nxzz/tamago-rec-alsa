@@ -81,10 +81,10 @@ class Tamago
         for (;;) {
             int readBuffFrames = snd_pcm_readi(capture_handle, buffer, bufferTime * (samplingRate / 1000));
 
-            bufferReadCount += readBuffFrames * snd_pcm_format_width(format) / 8 * channelCount;
+            readByte += readBuffFrames * snd_pcm_format_width(format) / 8 * channelCount;
             bufferReadCount++;
 
-            if (!callback(bufferReadCount, bufferReadCount, buffer, readBuffFrames * snd_pcm_format_width(format) / 8 * channelCount))
+            if (!callback(bufferReadCount, readByte, buffer, readBuffFrames * snd_pcm_format_width(format) / 8 * channelCount))
                 break;
         }
     }
