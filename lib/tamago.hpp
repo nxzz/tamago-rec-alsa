@@ -79,8 +79,14 @@ class Tamago
         unsigned long long int readByte = 0; // 今までバッファから読み込んだバイト数
 
         for (;;) {
+            // たまごから読みだす
             int readBuffFrames = snd_pcm_readi(capture_handle, buffer, bufferTime * (samplingRate / 1000));
 
+            // 読み出しがこけたら、リカバリを試す
+            if (readBuffFrames < 0) {
+                snd_pcm_recover(capture_handle, readBuffFrames, 0);
+                continue;
+            }
             readByte += readBuffFrames * snd_pcm_format_width(format) / 8 * channelCount;
             bufferReadCount++;
 
