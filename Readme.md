@@ -38,3 +38,9 @@ arecord -l
 ./rec -d hw:2 -o output.wav -t 10000 -l output.log
 
 ```
+
+
+## License
+TAMAGO-03 Recorder With ALSA by Rimpei Kunimoto is licensed under the Apache License, Version2.0
+
+`lib/cmdline.h` is published at https://github.com/tanakh/cmdline by Hideyuki Tanaka
