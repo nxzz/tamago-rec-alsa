@@ -12,7 +12,7 @@
 ## Usage
 ```sh
 # ALSAのライブラリ x86 以外はパッケージ名が違うかも
-apt install alsa arecord libasound2-dev 
+apt install alsa libasound2-dev 
 
 # コンパイル
 ./make.sh 
@@ -23,19 +23,19 @@ arecord -l
 
 ## 録音関連オプション
 # hw:2 のTAMAGOをoutput.wav に Ctrl+C で止めるまで録音
-./rec -d hw:2 -o output.wav
+./tamagorec -d hw:2 -o output.wav
 
 # hw:2 のTAMAGOをoutput.wav に 10秒録音
-./rec -d hw:2 -o output.wav -t 10000
+./tamagorec -d hw:2 -o output.wav -t 10000
 
 # hw:2 のTAMAGOをoutput.wav に 0.5秒録音
 # バッファサイズの整数倍しか録音できないので注意
-./rec -d hw:2 -o output.wav -t 500 -b 100
+./tamagorec -d hw:2 -o output.wav -t 500 -b 100
 
 ## ログ関連オプション
 # ログを output.log に保存する
 # -l 無しだと stdoutに吐く
-./rec -d hw:2 -o output.wav -t 10000 -l output.log
+./tamagorec -d hw:2 -o output.wav -t 10000 -l output.log
 
 ```
 
