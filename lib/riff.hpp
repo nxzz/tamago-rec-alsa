@@ -48,16 +48,17 @@ class RIFF
     void write(char *out, size_t size)
     {
         of.write(out, size);
+        int fileSize = of.tellp();                                                         // fileSize
+        of.seekp(riffStartPos, std::ios::beg);                                             // チャンクサイズ書き込み位置に移動
+        of.write(reinterpret_cast<const char *>(new int(fileSize - 8)), 4);                // チャンクサイズ 総データ数 - RIFFヘッダ(4byte)とWAVヘッダ(4byte)
+        of.seekp(dataStartPos, std::ios::beg);                                             // サブチャンクサイズ書き込み位置に移動
+        of.write(reinterpret_cast<const char *>(new int(fileSize - dataStartPos - 4)), 4); // サブチャンクサイズ 総データ数 - RIFFヘッダ＋WAVヘッダ + チャンクヘッダ(126byte)
+        of.seekp(fileSize, std::ios::beg);                                                 // 元の位置に戻る
     }
 
     // ファイルを閉じる前に、ファイルサイズを保存してお片付け
     ~RIFF()
     {
-        int fileSize = of.tellp();
-        of.seekp(riffStartPos, std::ios::beg);                                             // チャンクサイズ書き込み位置に移動
-        of.write(reinterpret_cast<const char *>(new int(fileSize - 8)), 4);                // チャンクサイズ 総データ数 - RIFFヘッダ(4byte)とWAVヘッダ(4byte)
-        of.seekp(dataStartPos, std::ios::beg);                                             // サブチャンクサイズ書き込み位置に移動
-        of.write(reinterpret_cast<const char *>(new int(fileSize - dataStartPos - 4)), 4); // サブチャンクサイズ 総データ数 - RIFFヘッダ＋WAVヘッダ + チャンクヘッダ(126byte)
         of.close();
     }
 };
