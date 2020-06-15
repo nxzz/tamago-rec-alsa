@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "./lib/cmdline.h"
+#include "./lib/rf64.hpp"
 #include "./lib/riff.hpp"
 #include "./lib/tamago.hpp"
 #include <csignal>
@@ -71,7 +72,10 @@ int main(int argc, char *argv[])
     Tamago egg(recDeviceName, recBufSize);
 
     // ./rec.wav に 8ch 16khz/24bit で書き込む
-    RIFF wav(outputFileName, 8, 24, 16000);
+    // RIFF wav(outputFileName, 8, 24, 16000);
+
+    // ./rec.wav に 8ch 16khz/24bit wav拡張のRF64で書き込む
+    RF64 wav(outputFileName, 8, 24, 16000);
 
     // バッファにたまるたびに呼ばれるコールバック関数
     egg.getBuffer([&](unsigned int readCount, unsigned long long int readLength, char *buffer, int readBuffFrames) {

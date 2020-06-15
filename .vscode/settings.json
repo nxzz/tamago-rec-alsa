@@ -49,7 +49,9 @@
         "ctime": "cpp",
         "chrono": "cpp",
         "ratio": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "csignal": "cpp",
+        "bit": "cpp"
     },
     "C_Cpp.clang_format_style": "file",
     "editor.formatOnSave": true,
